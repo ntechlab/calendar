@@ -15,6 +15,7 @@
  * @param boolean startEditable: 開始日時の変更可否
  * @param boolean durationEditable: イベントの間隔（開始日時～終了日時の期間）の変更可否
  * @param String source: jsonデータやgoogleカレンダーのデータを取り込む際に使用
+ * @param String description: イベントの説明文
  */
 [
   {
@@ -22,7 +23,8 @@
     "title": "All Day Event",
     "start": "2014-11-01",
     "allDay": "true",
-    "className": "class-a"
+    "className": "class-a",
+    "description": "イベントの説明文です。。。。。"
   },
   {
     "id": "a-02",

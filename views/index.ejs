@@ -23,7 +23,16 @@
 					defaultDate: '2014-11-12',  //TODO 一旦、11月にしておく
 					editable: true,
 					eventLimit: false, // allow "more" link when too many events
-					events: data
+					events: data,
+					
+					// イベントをクリックしたらポップアップ表示
+					eventClick: function(calEvent, jsEvent, view) {
+						if(calEvent.description!=undefined){
+							alert(calEvent.description);
+						}
+						//$('#calendar').fullCalendar('updateEvent', calEvent);
+					}
+					
 				});
 			});
 
