@@ -1,18 +1,27 @@
 /*!
  * カレンダーイベント定義
  * 
- * @param id: ID. 表示／非表示制御に使用
- * @param className: styleSheetクラス名. 表示／非表示制御、オブジェクトスタイル指定に使用
- * @param title: タイトル
- * @param start: 開始日時
- * @param end: 終了日時
- * @param url: リンク指定
+ * @param String title: タイトル
+ * @param String strid: ID. 表示／非表示制御に使用
+ * @param String className: styleSheetクラス名. 表示／非表示制御、オブジェクトスタイル指定に使用
+ * @param boolean allDay: 終日のイベント
+ * @param datetime start: 開始日時  ex) "2014-09-01", "2014-09-09T16:00:00"
+ * @param datetime end: 終了日時  ex) "2014-09-01", "2014-09-09T16:00:00"
+ * @param String url: イベントクリックした際に遷移するURL
+ * @param String backgroundColor: 背景色（基本的に使用しない）
+ * @param String textColor: 文字色（基本的に使用しない）
+ * @param String borderColor: 線の色（基本的に使用しない）
+ * @param boolean editable: 編集可否
+ * @param boolean startEditable: 開始日時の変更可否
+ * @param boolean durationEditable: イベントの間隔（開始日時～終了日時の期間）の変更可否
+ * @param String source: jsonデータやgoogleカレンダーのデータを取り込む際に使用
  */
 [
   {
     "id": "a-01",
     "title": "All Day Event",
     "start": "2014-11-01",
+    "allDay": "true",
     "className": "class-a"
   },
   {
