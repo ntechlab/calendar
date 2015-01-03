@@ -13,7 +13,7 @@ How to use:
  - node ./bin/www 
  - do access to http://localhost:3000/ 
  
-Chanfes(v0.0):
+Changes(v0.0):
 ---------------------
 
 
