@@ -6,3 +6,6 @@ body {
 a {
   color: #00B7FF;
 }
+
+.fc-sun { color: #ff0000; background-color: #FFB6C1; } /* “ú—j“ú */
+.fc-sat { color: #0000ff; background-color: #B0C4DE; } /* “y—j“ú */
