@@ -4,7 +4,9 @@ calendar
 
 Developer setup info:
 ---------------------
- - git clone https://github.com/ntechlab/calendar.git
+ - mongodbをインストール
+ - git clone https://github.com/ntechlab/calendar.git<br>
+   (developブランチをcloneする場合は、git clone -b develop https://github.com/ntechlab/calendar.git)
  - cd calendar
  - npm install
 
