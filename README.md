@@ -14,6 +14,7 @@ How to use:
 ---------------------
  - node ./bin/www 
  - do access to http://localhost:3000/ 
+ - ユーザーが0件の場合にはデフォルト管理ユーザーadminが作成される。パスワードは、nodeapp123
  
 Changes(v0.0):
 ---------------------
