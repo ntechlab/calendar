@@ -1,15 +1,16 @@
 var express = require('express');
 var router = express.Router();
+var um_utils = require('../lib/um_utils');
 
 /* GET home page. */
 var fs = require('fs');
 var events = fs.readFileSync('./public/json/events.json', 'utf8');
 console.log(events);
 router.get('/', function(req, res) {
-  res.render('index', { 
-	title: '可憐だ',
-	data:events
-	});
+  var map = um_utils.getNavbarInfo(req, res);
+  map.title = '可憐だ';
+  map.data = events;
+  res.render('index', map);
 });
 
 module.exports = router;

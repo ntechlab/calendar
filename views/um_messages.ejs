@@ -1,0 +1,21 @@
+<style>
+	.info {
+		background-color: #eef;
+	}
+	.error {
+		background-color: #fee;
+	}
+	/* デフォルトのナビゲーションバーとメッセージ領域を隣接させる。*/
+	.navbar {
+		margin-bottom: 0;
+	}
+</style>
+<% if(locals.messages) { %>
+	<% messages.forEach(function(message){ %>
+	<div class="alert <%= message.type %>" role="alert">
+		<%= message.string %>
+	</div>
+	<% }) %>
+	<% removeMessages() %>
+</div>
+<% } %>
