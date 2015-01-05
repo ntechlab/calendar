@@ -2,7 +2,7 @@
   <div class="container-fluid">
     <!-- Brand and toggle get grouped for better mobile display -->
     <div class="navbar-header">
-      <a class="navbar-brand" href="#">Brand</a>
+     <a class="navbar-brand" style="color:white;" href="#">Calendar</a>
     </div>
     <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
         <span class="sr-only">Toggle navigation</span>
@@ -26,17 +26,11 @@
           <% } %>
           <% if(header.authen["logged-in"]){ %>
           <li>
-            <p class="navbar-text" style="padding-left:15px">ログイン</p>
-          </li>
-          <li>
             <a href="/auth/logout">ログアウト</a>
           </li>
           <% } else { %>
           <li>
             <a href="/auth/login">ログイン</a>
-          </li>
-          <li>
-            <p class="navbar-text" style="padding-left:15px">ログアウト</p>
           </li>
           <% } %>
           <% if(header.authen["list-user"] || header.authen["create-user"]){ %>

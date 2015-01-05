@@ -8,7 +8,7 @@ var events = fs.readFileSync('./public/json/events.json', 'utf8');
 console.log(events);
 router.get('/', function(req, res) {
   var map = um_utils.getNavbarInfo(req, res);
-  map.title = '可憐だ';
+  map.title = 'Calendar';
   map.data = events;
   res.render('index', map);
 });
