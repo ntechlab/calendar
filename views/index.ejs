@@ -11,8 +11,9 @@
 		<script src='/javascripts/fullcalendar.min.js'></script>
 		<script src='/javascripts/ja.js'></script>
 		<script type="text/javascript"><!--
+			var data = <%-data%>;
 			$(document).ready(function() {
-				var data = <%-data%>;
+
 				$('#calendar').fullCalendar({
 					header: {
 							left: 'prev,next today',
@@ -23,7 +24,7 @@
 					editable: true,
 					eventLimit: false, // allow "more" link when too many events
 					events: data,
-					
+
 					// イベントをクリックしたらポップアップ表示
 					eventClick: function(calEvent, jsEvent, view) {
 						if(calEvent.description!=undefined){
@@ -31,7 +32,7 @@
 						}
 						//$('#calendar').fullCalendar('updateEvent', calEvent);
 					}
-					
+
 				});
 			});
 
@@ -57,41 +58,43 @@
     <% include um_navbar %>
     <% include um_messages %>
     <div class="container" role="main">
-	<div id='calendar'></div>
-	<h3>イベント非表示 <span>（選択したイベントを非表示にします）</span></h3>
-	<ul class="delete-events_class">
-		<li><a href="#" class="class-a">class-a</a></li>
-		<li><a href="#" class="class-b">class-b</a></li>
-		<li><a href="#" class="class-c">class-c</a></li>
-	</ul>
-	<!--ul class="delete-events_date">
-		<li><a href="#">2014-10-01</a></li>
-		<li><a href="#">2014-10-03</a></li>
-		<li><a href="#">2014-10-04</a></li>
-		<li><a href="#">2014-10-07</a></li>
-		<li><a href="#">2014-10-09</a></li>
-	</ul-->
-	<p><a href="#" onclick="location.reload(); return false;">再表示</a></p>
+    <div class="row">
+	    <div class="col-sm-2">
+		    <h3>イベント表示・非表示</h3>
+			<ul>
+			  <% for (var i = 0;i < eventClassList.length;i++){ %>
+				<li><input type="checkbox" checked="checked" id="<%= eventClassList[i] %>" onclick="del('<%= eventClassList[i] %>')"/><%= eventClassList[i] %></li>
+			  <% } %>
+			</ul>
+	    </div>
+	    <div class="col-sm-10">
+			<div id='calendar'></div>
+		</div>
+	</div>
 	</div>
  </body>
- 
-<script type="text/javascript"><!--
+
+<script type="text/javascript">
+<!--
 	//イベント削除のクラス名をクリックしたときの処理
-	$(".delete-events_class a").click(function(){
-		var className = $(this).text();
-		//フィルター内で直接処理をする
-		$('#calendar').fullCalendar('clientEvents', function(clEvent){
-			if(clEvent.className == className){ //クラス名が一致するイベントについて、処理をする
-				$('#calendar').fullCalendar('removeEvents', clEvent.id);
+	function del(className){
+		data.forEach(function (ev){
+			if(ev.className == className){
+				var checked = $("#"+className+":checked").val();
+				if(checked){
+					$('#calendar').fullCalendar('renderEvent', ev);
+				} else {
+					$('#calendar').fullCalendar('removeEvents', ev.id);
+				}
 			}
 		});
 		return false;
-	});
-	
+	};
+
 	//イベント削除の日付をクリックしたときの処理
 	$(".delete-events_date a").click(function(){
 		var eventDate = $(this).text();
-		
+
 		//フィルターで「selectedEvents」にイベントを取得しする
 		var selectedEvents = $('#calendar').fullCalendar('clientEvents', function(clEvent){
 			var rootEventDate = moment(clEvent.start);
@@ -104,15 +107,15 @@
 				return false;
 			}
 		});
-		
+
 		//取得したイベントすべてに処理を行う
 		for(var i in selectedEvents){
 			$('#calendar').fullCalendar('removeEvents', selectedEvents[i].id);
 		}
-		
+
 		return false;
 	});
-	
+
 --></script>
 
 </html>
