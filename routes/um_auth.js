@@ -20,11 +20,13 @@ var User = mongoose.model('User');
 process.on('SIGINT', function() {
 	console.log("SIGINTが発生したため、mongooseのコネクションを閉じます。");
 	mongoose.disconnect();
+	process.exit(0);
 });
 
 process.on('SIGTERM', function() {
 	console.log("SIGTERMが発生したため、mongooseのコネクションを閉じます。");
 	mongoose.disconnect();
+	process.exit(0);
 });
 
 function createDefaultAdminUser() {
