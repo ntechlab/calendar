@@ -7,8 +7,8 @@ a {
   color: #00B7FF;
 }
 
-.fc-sun { color: #ff0000; background-color: #FFB6C1; } /* “ú—j“ú */
-.fc-sat { color: #0000ff; background-color: #B0C4DE; } /* “y—j“ú */
+.fc-sun { color: #ff0000; background-color: #FFB6C1; } /* ï¿½ï¿½jï¿½ï¿½ */
+.fc-sat { color: #0000ff; background-color: #B0C4DE; } /* ï¿½yï¿½jï¿½ï¿½ */
 
 
 
@@ -67,4 +67,10 @@ p{
 }
 .fc-time{
 	display: none;
+}
+
+.holiday {
+	border-color: red;
+	background: #eaa;
+	color: #fff;
 }
