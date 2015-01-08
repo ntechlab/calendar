@@ -23,9 +23,22 @@
 					defaultDate: '2014-11-12',  //TODO 一旦、11月にしておく
 					defaultView: 'agendaDay', //初めの表示内容を指定
 					editable: true,
+					// 高さ(px)
+					height: 560,
+					// スロットの時間の書式
+					axisFormat: 'H(:mm)',
+					// スロットの分
+					slotDuration: '00:30:00',
+					// 選択する時間間隔
+					snapDuration: '00:30:00',
+					// スクロール開始時間
+					scrollTime: '09:00:00',
+					// 最小時間
+					//minTime: '08:00:00',
+					// 最大時間
+					//maxTime: '21:00:00',
 					eventLimit: false, // allow "more" link when too many events
 					events: data,
-
 					// イベントをクリックしたらポップアップ表示
 					eventClick: function(calEvent, jsEvent, view) {
 						if(calEvent.description!=undefined){
