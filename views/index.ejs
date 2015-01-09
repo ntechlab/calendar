@@ -79,8 +79,8 @@
 	    <div class="col-sm-2">
 		    <h3>イベント表示・非表示</h3>
 			<ul>
-			  <% for (var i = 0;i < eventClassList.length;i++){ %>
-				<li><input type="checkbox" checked="checked" id="<%= eventClassList[i] %>" onclick="del('<%= eventClassList[i] %>')"/><%= eventClassList[i] %></li>
+			  <% for (var i = 0;i < eventGroupList.length;i++){ %>
+				<li><input type="checkbox" checked="checked" id="<%= eventGroupList[i].groupId %>" onclick="del('<%= eventGroupList[i].groupId %>')"/><%= eventGroupList[i].groupName %></li>
 			  <% } %>
 			</ul>
 	    </div>
@@ -94,10 +94,10 @@
 <script type="text/javascript">
 <!--
 	//イベント削除のクラス名をクリックしたときの処理
-	function del(className){
+	function del(groupId){
 		data.forEach(function (ev){
-			if(ev.className == className){
-				var checked = $("#"+className+":checked").val();
+			if(ev.groupId == groupId){
+				var checked = $("#"+groupId+":checked").val();
 				if(checked){
 					$('#calendar').fullCalendar('renderEvent', ev);
 				} else {

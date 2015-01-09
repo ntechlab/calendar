@@ -9,7 +9,7 @@ var path = './public/json/';
 function getEvents(){
 	var list = fs.readdirSync(path);
 	var events = [];
-	var classList = [];
+	var eventGroupList = [];
 	var holidays= convertFileToEventObject(path + "/static/holiday.json", 'utf8');
 	u.each(holidays, function (ev){
 		ev.className = "holiday";
@@ -19,18 +19,31 @@ function getEvents(){
 	list.forEach(function (v){
 		console.log(v);
 		if(v.match("\.json$")){
-			var className = v.replace(/\.json$/, "");
-			classList.push(className);
 			var obj = convertFileToEventObject(path+"/"+v, 'utf8');
-			u.each(obj, function (ev){
-				ev["className"] = className;
+			var fileInfo = obj.fileInfo;
+			var globalProperty = fileInfo.globalProperty;
+			u.each(obj.event, function (ev){
+				// 各イベントにグローバルプロパティを設定
+				u.each(globalProperty, function (value, key){
+					if(value){
+						ev[key] = value;
+					}
+				});
 				events.push(ev);
+				
+				// 新規グループをグループIDリストに追加
+				var isFirstGroup = !u.some(eventGroupList, function (eg) {
+					return eg.groupId == ev.groupId;
+				});
+				if(isFirstGroup){
+					var eventGroup = { groupId: ev.groupId, groupName: ev.groupName};
+					eventGroupList.push(eventGroup);
+				};
 			});
 		}
 	});
-	
 	console.dir(events);
-	return { events: events, classList: classList};
+	return { events: events, eventGroupList: eventGroupList};
 }
 
 function convertFileToEventObject(path, encoding){
@@ -47,10 +60,10 @@ router.get('/', function(req, res) {
   if(req.isAuthenticated()){
 	  map.title = 'Calendar';
 	  var eventObj = getEvents();
-	  var evv = JSON.stringify(getEvents().events);
+	  var evv = JSON.stringify(eventObj.events);
 
 	  map.data = evv;
-	  map.eventClassList = eventObj.classList;
+	  map.eventGroupList = eventObj.eventGroupList;
 	  return res.render('index', map);
   } else {
 	  return res.redirect('/auth/login');

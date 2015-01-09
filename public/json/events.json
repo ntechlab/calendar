@@ -1,62 +1,78 @@
-/*!
- * カレンダーイベント定義
- *
- * @param String title: タイトル
- * @param String strid: ID. 表示／非表示制御に使用
- * @param String className: styleSheetクラス名. 表示／非表示制御、オブジェクトスタイル指定に使用
- * @param boolean allDay: 終日のイベント
- * @param datetime start: 開始日時  ex) "2014-09-01", "2014-09-09T16:00:00"
- * @param datetime end: 終了日時  ex) "2014-09-01", "2014-09-09T16:00:00"
- * @param String url: イベントクリックした際に遷移するURL
- * @param String backgroundColor: 背景色（基本的に使用しない）
- * @param String textColor: 文字色（基本的に使用しない）
- * @param String borderColor: 線の色（基本的に使用しない）
- * @param boolean editable: 編集可否
- * @param boolean startEditable: 開始日時の変更可否
- * @param boolean durationEditable: イベントの間隔（開始日時～終了日時の期間）の変更可否
- * @param String source: jsonデータやgoogleカレンダーのデータを取り込む際に使用
- * @param String description: イベントの説明文
- */
-[
-  {
-    "id": "a-01",
-    "title": "All Day Event",
-    "start": "2014-11-01",
-    "allDay": "true",
-    "className": "class-a",
-    "description": "イベントの説明文です。。。。。"
+{
+  /*!
+   * ファイル制御定義
+   *
+   * @param String fileName: ファイル名
+   * @param String global_property: このファイル内のカレンダーイベント共通属性に使用
+   */
+  "fileInfo":{
+    "fileName": "events(未使用)",
+    "globalProperty": {
+      "groupId": "event1",
+      "groupName": "イベント１",
+      "className": "class-c"
+    }
   },
-  {
-    "id": "a-02",
-    "title": "Long Event",
-    "start": "2014-11-07",
-    "end": "2014-11-10",
-    "className": "class-a"
-  },
-  {
-    "id": "a-03",
-    "title": "Repeating Event",
-    "start": "2014-11-09T16:00:00-05:00",
-    "className": "class-a"
-  },
-  {
-    "id": "a-04",
-    "title": "Repeating Event",
-    "start": "2014-11-16T16:00:00-05:00",
-    "className": "class-a"
-  },
-  {
-    "id": "a-05",
-    "title": "Conference",
-    "start": "2014-11-11",
-    "end": "2014-11-13",
-    "className": "class-a"
-  },
-  {
-    "id": "a-05",
-    "title": "Meeting",
-    "start": "2014-11-12T10:30:00-05:00",
-    "end": "2014-11-12T12:30:00-05:00",
-    "className": "class-a"
-  }
-]
+  /*!
+   * カレンダーイベント定義
+   *
+   * @param String title: タイトル
+   * @param String strid: ID. 表示／非表示制御に使用
+   * @param String className: styleSheetクラス名. 表示／非表示制御、オブジェクトスタイル指定に使用
+   * @param boolean allDay: 終日のイベント
+   * @param datetime start: 開始日時  ex) "2014-09-01", "2014-09-09T16:00:00"
+   * @param datetime end: 終了日時  ex) "2014-09-01", "2014-09-09T16:00:00"
+   * @param String url: イベントクリックした際に遷移するURL
+   * @param String backgroundColor: 背景色（基本的に使用しない）
+   * @param String textColor: 文字色（基本的に使用しない）
+   * @param String borderColor: 線の色（基本的に使用しない）
+   * @param boolean editable: 編集可否
+   * @param boolean startEditable: 開始日時の変更可否
+   * @param boolean durationEditable: イベントの間隔（開始日時～終了日時の期間）の変更可否
+   * @param String source: jsonデータやgoogleカレンダーのデータを取り込む際に使用
+   * @param String description: イベントの説明文
+   */
+  "event":[
+    {
+      "id": "a-01",
+      "title": "All Day Event",
+      "start": "2014-11-01",
+      "allDay": "true",
+      "className": "class-a",
+      "description": "イベントの説明文です。。。。。"
+    },
+    {
+      "id": "a-02",
+      "title": "Long Event",
+      "start": "2014-11-07",
+      "end": "2014-11-10",
+      "className": "class-a"
+    },
+    {
+      "id": "a-03",
+      "title": "Repeating Event",
+      "start": "2014-11-09T16:00:00-05:00",
+      "className": "class-a"
+    },
+    {
+      "id": "a-04",
+      "title": "Repeating Event",
+      "start": "2014-11-16T16:00:00-05:00",
+      "className": "class-a"
+    },
+    {
+      "id": "a-05",
+      "title": "Conference",
+      "start": "2014-11-11",
+      "end": "2014-11-13"/*,
+      "className": "class-a" */
+    },
+    {
+      "id": "a-05",
+      "title": "Meeting",
+      "start": "2014-11-12T10:30:00-05:00",
+      "end": "2014-11-12T12:30:00-05:00",
+      "className": "class-a"
+    }
+  ]
+}
