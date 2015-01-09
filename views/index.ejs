@@ -13,7 +13,6 @@
 		<script type="text/javascript"><!--
 			var data = <%-data%>;
 			$(document).ready(function() {
-
 				$('#calendar').fullCalendar({
 					header: {
 							left: 'prev,next today',
@@ -26,7 +25,7 @@
 					// 高さ(px)
 					height: 560,
 					// スロットの時間の書式
-					axisFormat: 'H(:mm)',
+					axisFormat: 'H:mm',
 					// スロットの分
 					slotDuration: '00:30:00',
 					// 選択する時間間隔
@@ -39,6 +38,11 @@
 					//maxTime: '21:00:00',
 					eventLimit: false, // allow "more" link when too many events
 					events: data,
+					// 日付をクリックしたら日カレンダーへ移動する
+					dayClick: function(date, allDay, jsEvent, view) {
+						$('#calendar').fullCalendar('changeView', 'agendaDay');
+						$('#calendar').fullCalendar('gotoDate', date);
+					},
 					// イベントをクリックしたらポップアップ表示
 					eventClick: function(calEvent, jsEvent, view) {
 						if(calEvent.description!=undefined){
@@ -46,7 +50,6 @@
 						}
 						//$('#calendar').fullCalendar('updateEvent', calEvent);
 					}
-
 				});
 			});
 
