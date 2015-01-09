@@ -1,0 +1,58 @@
+/*!
+ * カレンダーイベント定義
+ *
+ * @param String title: タイトル
+ * @param String strid: ID. 表示／非表示制御に使用
+ * @param String className: styleSheetクラス名. 表示／非表示制御、オブジェクトスタイル指定に使用
+ * @param boolean allDay: 終日のイベント
+ * @param datetime start: 開始日時  ex) "2014-09-01", "2014-09-09T16:00:00"
+ * @param datetime end: 終了日時  ex) "2014-09-01", "2014-09-09T16:00:00"
+ * @param String url: イベントクリックした際に遷移するURL
+ * @param String backgroundColor: 背景色（基本的に使用しない）
+ * @param String textColor: 文字色（基本的に使用しない）
+ * @param String borderColor: 線の色（基本的に使用しない）
+ * @param boolean editable: 編集可否
+ * @param boolean startEditable: 開始日時の変更可否
+ * @param boolean durationEditable: イベントの間隔（開始日時～終了日時の期間）の変更可否
+ * @param String source: jsonデータやgoogleカレンダーのデータを取り込む際に使用
+ * @param String description: イベントの説明文
+ */
+[
+  {
+    "id": "b-01",
+    "title": "Lunch",
+    "start": "2014-11-12T12:00:00-05:00",
+	"className": "class-b"
+  },
+  {
+    "id": "a-06",
+    "title": "Meeting",
+    "start": "2014-11-12T14:30:00-05:00",
+    "className": "class-a"
+  },
+  {
+    "id": "b-02",
+    "title": "Happy Hour",
+    "start": "2014-11-12T17:30:00-05:00",
+   	"className": "class-b"
+  },
+  {
+    "id": "b-03",
+    "title": "Dinner",
+    "start": "2014-11-12T20:00:00",
+    "className": "class-b"
+  },
+  {
+    "id": "b-04",
+    "title": "Birthday Party",
+    "start": "2014-11-13T07:00:00-05:00",
+    "className": "class-b"
+  },
+  {
+    "id": "c-01",
+    "title": "Click for Google",
+    "url": "http://google.com/",
+    "start": "2014-11-28",
+    "className": "class-c"
+  }
+]

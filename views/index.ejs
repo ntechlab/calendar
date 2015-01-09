@@ -1,0 +1,135 @@
+<!DOCTYPEhtml>
+<html>
+	<head>
+		<meta charset='utf-8'/>
+		<title><%=title%></title>
+		<% include um_head %>
+		<link rel='stylesheet' href='/stylesheets/fullcalendar.css'/>
+		<link rel='stylesheet' href='/stylesheets/fullcalendar.print.css' media='print' />
+		<link rel='stylesheet' href='/stylesheets/style.css'/>
+		<script src='/javascripts/lib/moment.min.js'></script>
+		<script src='/javascripts/fullcalendar.min.js'></script>
+		<script src='/javascripts/ja.js'></script>
+		<script type="text/javascript"><!--
+			var data = <%-data%>;
+			$(document).ready(function() {
+
+				$('#calendar').fullCalendar({
+					header: {
+							left: 'prev,next today',
+							center: 'title',
+							right: 'month,agendaWeek,agendaDay'
+					},
+					defaultDate: '2014-11-12',  //TODO 一旦、11月にしておく
+					defaultView: 'agendaDay', //初めの表示内容を指定
+					editable: true,
+					// 高さ(px)
+					height: 560,
+					// スロットの時間の書式
+					axisFormat: 'H(:mm)',
+					// スロットの分
+					slotDuration: '00:30:00',
+					// 選択する時間間隔
+					snapDuration: '00:30:00',
+					// スクロール開始時間
+					scrollTime: '09:00:00',
+					// 最小時間
+					//minTime: '08:00:00',
+					// 最大時間
+					//maxTime: '21:00:00',
+					eventLimit: false, // allow "more" link when too many events
+					events: data,
+					// イベントをクリックしたらポップアップ表示
+					eventClick: function(calEvent, jsEvent, view) {
+						if(calEvent.description!=undefined){
+							alert(calEvent.description);
+						}
+						//$('#calendar').fullCalendar('updateEvent', calEvent);
+					}
+
+				});
+			});
+
+		--></script>
+		<style>
+
+			body {
+				padding: 0;
+				font-family: "Lucida Grande",Helvetica,Arial,Verdana,sans-serif;
+				font-size: 14px;
+			}
+
+			#calendar {
+				max-width: 900px;
+				margin: 0 auto;
+			}
+
+		</style>
+
+
+ </head>
+ <body>
+    <% include um_navbar %>
+    <% include um_messages %>
+    <div class="container" role="main">
+    <div class="row">
+	    <div class="col-sm-2">
+		    <h3>イベント表示・非表示</h3>
+			<ul>
+			  <% for (var i = 0;i < eventClassList.length;i++){ %>
+				<li><input type="checkbox" checked="checked" id="<%= eventClassList[i] %>" onclick="del('<%= eventClassList[i] %>')"/><%= eventClassList[i] %></li>
+			  <% } %>
+			</ul>
+	    </div>
+	    <div class="col-sm-10">
+			<div id='calendar'></div>
+		</div>
+	</div>
+	</div>
+ </body>
+
+<script type="text/javascript">
+<!--
+	//イベント削除のクラス名をクリックしたときの処理
+	function del(className){
+		data.forEach(function (ev){
+			if(ev.className == className){
+				var checked = $("#"+className+":checked").val();
+				if(checked){
+					$('#calendar').fullCalendar('renderEvent', ev);
+				} else {
+					$('#calendar').fullCalendar('removeEvents', ev.id);
+				}
+			}
+		});
+		return false;
+	};
+
+	//イベント削除の日付をクリックしたときの処理
+	$(".delete-events_date a").click(function(){
+		var eventDate = $(this).text();
+
+		//フィルターで「selectedEvents」にイベントを取得しする
+		var selectedEvents = $('#calendar').fullCalendar('clientEvents', function(clEvent){
+			var rootEventDate = moment(clEvent.start);
+			rootEventDate = ((rootEventDate.format()).split('T'))[0];
+			if(rootEventDate == eventDate){
+				//日付が一致するイベントを、データとして返す
+				return true;
+			}else{
+				//日付が一致しない場合は、データとして返さない
+				return false;
+			}
+		});
+
+		//取得したイベントすべてに処理を行う
+		for(var i in selectedEvents){
+			$('#calendar').fullCalendar('removeEvents', selectedEvents[i].id);
+		}
+
+		return false;
+	});
+
+--></script>
+
+</html>

@@ -1,0 +1,76 @@
+body {
+  padding: 0px;
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+
+a {
+  color: #00B7FF;
+}
+
+.fc-sun { color: #ff0000; background-color: #FFB6C1; } /* ��j�� */
+.fc-sat { color: #0000ff; background-color: #B0C4DE; } /* �y�j�� */
+
+
+
+a:hover{
+	text-decoration: none;
+}
+#calendar{
+	width: 720px;
+	margin: 0 auto;
+}
+.class-a{
+	border-color: #3a87ad;
+	background: #3a87ad;
+	color: #fff;
+}
+.class-b{
+	border-color: #73ad3a;
+	background: #73ad3a;
+	color: #fff;
+}
+.class-c{
+	border-color: #ad4d3a;
+	background: #ad4d3a;
+	color: #fff;
+}
+h3{
+	font-size: 14px;
+	text-align: center;
+}
+h3 span{
+	color: #666;
+	font-size: 12px;
+	font-weight: normal;
+}
+.delete-events_class,
+.delete-events_date{
+	display: table;
+	width: 300px;
+	padding: 0;
+	margin: 0 auto;
+}
+/* .delete-events_date{ */
+/* 	width: 720px; */
+/* } */
+.delete-events_class li,
+.delete-events_date li{
+	display: table-cell;
+	padding: 5px 10px;
+	text-align: center;
+}
+.delete-events_class li a{
+	padding: 5px;
+}
+p{
+	text-align: center;
+}
+.fc-time{
+/*	display: none; */
+}
+
+.holiday {
+	border-color: red;
+	background: #eaa;
+	color: #fff;
+}

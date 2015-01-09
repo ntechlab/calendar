@@ -1,0 +1,52 @@
+  <nav class="navbar navbar-default navbar-inverse">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+     <a class="navbar-brand" style="color:white;" href="#">Calendar</a>
+    </div>
+    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    <p class="navbar-text navbar-left" style="color:white">
+    <%= header.username %>&nbsp;<%= header.fullname %>&nbsp;
+    <!--認証状態[<%= header.authen["logged-in"] %>]&nbsp;
+    ロール[<%= header.roles %>]>-->
+    </p>
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav navbar-right">
+          <li><a href="/">トップ</a></li>
+          <% if(header.authen["logged-in"]){ %>
+          <li>
+            <a href="/auth/user/<%= header.username %>">ユーザー情報</a>
+          </li>
+          <% } %>
+          <% if(header.authen["logged-in"]){ %>
+          <li>
+            <a href="/auth/logout">ログアウト</a>
+          </li>
+          <% } else { %>
+          <li>
+            <a href="/auth/login">ログイン</a>
+          </li>
+          <% } %>
+          <% if(header.authen["list-user"] || header.authen["create-user"]){ %>
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">ユーザー管理<span class="caret"></span></a>
+            <ul class="dropdown-menu" role="menu">
+              <% if(header.authen["list-user"]){ %>
+              <li><a href="/auth/users">ユーザー一覧</a></li>
+              <% } %>
+              <% if(header.authen["create-user"]){ %>
+              <li><a href="/auth/create-user">ユーザー登録</a></li>
+              <% } %>
+            </ul>
+          </li>
+          <% } %>
+      </ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
