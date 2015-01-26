@@ -10,6 +10,7 @@ function getEvents(){
 	var list = fs.readdirSync(path);
 	var events = [];
 	var eventGroupList = [];
+	var eventObject = [];
 	var holidays= convertFileToEventObject(path + "/static/holiday.json", 'utf8');
 	u.each(holidays, function (ev){
 		ev.className = "holiday";
@@ -19,31 +20,65 @@ function getEvents(){
 	list.forEach(function (v){
 		console.log(v);
 		if(v.match("\.json$")){
-			var obj = convertFileToEventObject(path+"/"+v, 'utf8');
-			var fileInfo = obj.fileInfo;
-			var globalProperty = fileInfo.globalProperty;
-			u.each(obj.event, function (ev){
-				// 各イベントにグローバルプロパティを設定
-				u.each(globalProperty, function (value, key){
-					if(value){
-						ev[key] = value;
-					}
-				});
-				events.push(ev);
-				
-				// 新規グループをグループIDリストに追加
-				var isFirstGroup = !u.some(eventGroupList, function (eg) {
-					return eg.groupId == ev.groupId;
-				});
-				if(isFirstGroup){
-					var eventGroup = { groupId: ev.groupId, groupName: ev.groupName};
-					eventGroupList.push(eventGroup);
-				};
-			});
+			eventObject = processJSON(path+"/"+v);
+			events = events.concat(eventObject.events);
+			eventGroupList = eventGroupList.concat(eventObject.eventGroupList);
+		} else if (v.match("\.csv$")){
+			eventObject = processCSV(path+"/"+v);
 		}
 	});
 	console.dir(events);
 	return { events: events, eventGroupList: eventGroupList};
+}
+
+function processJSON(filePath) {
+	var events = [];
+	var eventGroupList = [];
+	var obj = convertFileToEventObject(filePath, 'utf8');
+	var fileInfo = obj.fileInfo;
+	var globalProperty = fileInfo.globalProperty;
+	u.each(obj.event, function (ev){
+		// 各イベントにグローバルプロパティを設定
+		u.each(globalProperty, function (value, key){
+			if(value){
+				ev[key] = value;
+			}
+		});
+		events.push(ev);
+		
+		// 新規グループをグループIDリストに追加
+		var isFirstGroup = !u.some(eventGroupList, function (eg) {
+			return eg.groupId == ev.groupId;
+		});
+		if(isFirstGroup){
+			var eventGroup = { groupId: ev.groupId, groupName: ev.groupName};
+			eventGroupList.push(eventGroup);
+		};
+	});
+	return { events: events, eventGroupList: eventGroupList};
+}
+function processCSV(filePath) {
+	var contents = fs.readFileSync(filePath, 'utf8');
+
+	var contentsArray = new Array();
+	contentsArray = contents.split("\n");
+	var objArray = new Array();
+	var keys = [];
+	u.each(contentsArray, function(line, index, contentsArray) {
+		var eventObj = {};
+		var tmpLine = line.replace("\r", "");
+		if (index === 0) {
+			keys = tmpLine.split("\t");
+		} else {
+			values = tmpLine.split("\t");
+			u.each(keys, function(key, index, keys) {
+				eventObj[key] = values[index];
+			});
+		}
+		objArray[index-1] = eventObj;
+	});
+	console.dir(objArray);
+	return objArray;
 }
 
 function convertFileToEventObject(path, encoding){
