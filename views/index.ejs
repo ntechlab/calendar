@@ -81,7 +81,8 @@
 		    <h3>イベント表示・非表示</h3>
 			<ul>
 			  <% for (var i = 0;i < eventGroupList.length;i++){ %>
-				<li><input type="checkbox" checked="checked" id="<%= eventGroupList[i].groupId %>" onclick="del('<%= eventGroupList[i].groupId %>')"/><%= eventGroupList[i].groupName %></li>
+				<li><input type="checkbox" checked="checked" id="<%= eventGroupList[i].groupId %>" onclick="del('<%= eventGroupList[i].groupId %>')"/>
+				<label for="<%= eventGroupList[i].groupId %>"><%= eventGroupList[i].groupName %></label></li>
 			  <% } %>
 			</ul>
 	    </div>

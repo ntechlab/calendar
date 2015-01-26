@@ -10,7 +10,6 @@ function getEvents(){
 	var list = fs.readdirSync(path);
 	var events = [];
 	var eventGroupList = [];
-	var eventObject = [];
 	var holidays= convertFileToEventObject(path + "/static/holiday.json", 'utf8');
 	u.each(holidays, function (ev){
 		ev.className = "holiday";
@@ -18,13 +17,16 @@ function getEvents(){
 		events.push(ev);
 	});
 	list.forEach(function (v){
+		var eventObject;
 		console.log(v);
 		if(v.match("\.json$")){
 			eventObject = processJSON(path+"/"+v);
-			events = events.concat(eventObject.events);
-			eventGroupList = eventGroupList.concat(eventObject.eventGroupList);
 		} else if (v.match("\.csv$")){
 			eventObject = processCSV(path+"/"+v);
+		}
+		if(eventObject){
+			events = events.concat(eventObject.events);
+			eventGroupList = eventGroupList.concat(eventObject.eventGroupList);
 		}
 	});
 	console.dir(events);
@@ -57,28 +59,78 @@ function processJSON(filePath) {
 	});
 	return { events: events, eventGroupList: eventGroupList};
 }
-function processCSV(filePath) {
-	var contents = fs.readFileSync(filePath, 'utf8');
 
-	var contentsArray = new Array();
+function processCSV(filePath) {
+	var events = [];
+	var eventGroupList = [];
+	var contents = fs.readFileSync(filePath, 'utf8');
+	var contentsArray = [];
 	contentsArray = contents.split("\n");
-	var objArray = new Array();
-	var keys = [];
+	var objArray = [];
+	var keys;
 	u.each(contentsArray, function(line, index, contentsArray) {
 		var eventObj = {};
+		var values;
 		var tmpLine = line.replace("\r", "");
 		if (index === 0) {
 			keys = tmpLine.split("\t");
 		} else {
 			values = tmpLine.split("\t");
-			u.each(keys, function(key, index, keys) {
-				eventObj[key] = values[index];
+			u.each(keys, function(key, index2, keys) {
+				eventObj[key] = values[index2];
 			});
 		}
 		objArray[index-1] = eventObj;
 	});
-	console.dir(objArray);
-	return objArray;
+	u.forEach(objArray, function(row){
+		var obj =  csvRowToObj(row);
+		events.push(obj.event);
+		eventGroupList.push(obj.eventGroup);
+	});
+	eventGroupList = unique(eventGroupList, ["groupName", "groupId"]);
+	return {events: events, eventGroupList: eventGroupList};
+}
+
+// 配列arrayに格納されたオブジェクトをkeysに関してuniqueを取る。
+function unique(array, keys){
+	var checkMap = {};
+	var ret = [];
+	u.forEach(array, function(row) {
+		var checkKey = "";
+		u.forEach(keys, function(key) {
+			checkKey += row[key]+",";
+		});
+		if (!checkMap[checkKey]){
+			ret.push(row);
+			checkMap[checkKey] = true;
+		}
+	});
+	return ret;
+}
+
+function csvRowToObj(row){
+	var KEY_ID = "meta_id_management";
+	var KEY_TITLE = "tab1_task_name";
+	var KEY_START = "start";
+	var KEY_END = "end";
+	var KEY_CLASS_NAME = "tab1_information_of_task";
+		
+	var event = {
+		"id": row[KEY_ID],
+		"title": row[KEY_TITLE],
+		"start": row[KEY_START],
+		"end": row[KEY_END],
+		"className": row[KEY_CLASS_NAME],
+		"groupName": row[KEY_CLASS_NAME],
+		"groupId": row[KEY_CLASS_NAME]
+	};
+	
+	var group = {
+		"groupName": row[KEY_CLASS_NAME],
+		"groupId": row[KEY_CLASS_NAME]
+	}
+		
+	return {event: event, eventGroup: group};
 }
 
 function convertFileToEventObject(path, encoding){
