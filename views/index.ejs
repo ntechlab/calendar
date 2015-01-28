@@ -8,7 +8,7 @@
 		<link rel='stylesheet' href='/stylesheets/fullcalendar.print.css' media='print' />
 		<link rel='stylesheet' href='/stylesheets/style.css'/>
 		<script src='/javascripts/lib/moment.min.js'></script>
-		<script src='/javascripts/fullcalendar.min.js'></script>
+		<script src='/javascripts/fullcalendar.js'></script>
 		<script src='/javascripts/ja.js'></script>
 		<script type="text/javascript"><!--
 			var data = <%-data%>;
@@ -19,6 +19,7 @@
 							center: 'title',
 							right: 'month,agendaWeek,agendaDay'
 					},
+					nextDayThreshold: '00:00:00',
 					timeFormat: "H:mm",
 					defaultDate: '2014-11-12',  //TODO 一旦、11月にしておく
 					defaultView: 'agendaDay', //初めの表示内容を指定
