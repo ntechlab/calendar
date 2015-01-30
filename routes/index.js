@@ -53,7 +53,7 @@ function processJSON(filePath) {
 			return eg.groupId == ev.groupId;
 		});
 		if(isFirstGroup){
-			var eventGroup = { groupId: ev.groupId, groupName: ev.groupName};
+			var eventGroup = { groupId: ev.groupId, groupName: ev.groupName, className: ev.className};
 			eventGroupList.push(eventGroup);
 		};
 	});
@@ -126,6 +126,7 @@ function csvRowToObj(row){
 	};
 	
 	var group = {
+		"className": row[KEY_CLASS_NAME],
 		"groupName": row[KEY_CLASS_NAME],
 		"groupId": row[KEY_CLASS_NAME]
 	}
