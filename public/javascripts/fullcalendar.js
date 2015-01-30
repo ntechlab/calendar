@@ -6860,7 +6860,6 @@ var View = fc.View = Class.extend({
 
 		if (end) {
 			var hasTime = end.hasTime();
-			console.log("hasTime:" + hasTime);
 			endDay = end.clone().stripTime(); // the beginning of the day the range exclusively ends
 			endTimeMS = +end.time(); // # of milliseconds into `endDay`
 

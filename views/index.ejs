@@ -12,6 +12,24 @@
 		<script src='/javascripts/ja.js'></script>
 		<script type="text/javascript"><!--
 			var data = <%-data%>;
+			
+			// チェックボックスの状態に応じて、対応するイベントグループの表示状態をshow/hiddenで変更する。
+			// この関数を、CalendarのeventAfterAllRenderに設定すると、レンダリングが終わるごとに上記の処理が動く。
+			function customRenderView(){
+				var checkBoxes = $('#checkBoxes .dispControl');
+				var len = checkBoxes.length;
+				for(var p = 0; p < len; p++) {
+					var $checkBox = $(checkBoxes[p]);
+					var checked = $checkBox.prop('checked');
+					var groupId = $checkBox.attr('id');
+					if(checked){
+						$('a.' + groupId).show();
+					} else {
+						$('a.' + groupId).hide();
+					}
+				}
+			}
+			
 			$(document).ready(function() {
 				$('#calendar').fullCalendar({
 					header: {
@@ -52,7 +70,8 @@
 							alert(calEvent.description);
 						}
 						//$('#calendar').fullCalendar('updateEvent', calEvent);
-					}
+					},
+					eventAfterAllRender: customRenderView
 				});
 			});
 
@@ -81,9 +100,9 @@
     <div class="row">
 	    <div class="col-sm-2">
 		    <h3>イベント表示・非表示</h3>
-			<ul>
+			<ul id="checkBoxes">
 			  <% for (var i = 0;i < eventGroupList.length;i++){ %>
-				<li><input type="checkbox" checked="checked" id="<%= eventGroupList[i].groupId %>" onclick="del('<%= eventGroupList[i].groupId %>')"/>
+				<li><input type="checkbox" class="dispControl" checked="checked" id="<%= eventGroupList[i].groupId %>" onclick="del('<%= eventGroupList[i].groupId %>')"/>
 				<label for="<%= eventGroupList[i].groupId %>"><%= eventGroupList[i].groupName %></label></li>
 			  <% } %>
 			</ul>
@@ -98,18 +117,9 @@
 
 <script type="text/javascript">
 <!--
-	//イベント削除のクラス名をクリックしたときの処理
+
 	function del(groupId){
-		data.forEach(function (ev){
-			if(ev.groupId == groupId){
-				var checked = $("#"+groupId+":checked").val();
-				if(checked){
-					$('#calendar').fullCalendar('renderEvent', ev);
-				} else {
-					$('#calendar').fullCalendar('removeEvents', ev.id);
-				}
-			}
-		});
+		customRenderView();
 		return false;
 	};
 
