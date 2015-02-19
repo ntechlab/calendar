@@ -68,19 +68,25 @@ function processCSV(filePath) {
 	contentsArray = contents.split("\n");
 	var objArray = [];
 	var keys;
+	var eventCnt = 0;
 	u.each(contentsArray, function(line, index, contentsArray) {
 		var eventObj = {};
 		var values;
 		var tmpLine = line.replace("\r", "");
-		if (index === 0) {
-			keys = tmpLine.split("\t");
-		} else {
-			values = tmpLine.split("\t");
-			u.each(keys, function(key, index2, keys) {
-				eventObj[key] = values[index2];
-			});
+
+		if(tmpLine != "") {
+			if (index === 0) {
+				keys = tmpLine.split("\t");
+			} else {
+				values = tmpLine.split("\t");
+				u.each(keys, function(key, index2, keys) {
+					eventObj[key] = values[index2];
+					console.log("eventCnt[" + eventCnt + "]");
+				});
+				objArray[eventCnt] = eventObj;
+				eventCnt++;
+			}
 		}
-		objArray[index-1] = eventObj;
 	});
 	u.forEach(objArray, function(row){
 		var obj =  csvRowToObj(row);
