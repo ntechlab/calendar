@@ -18,7 +18,7 @@ function getEvents(){
 	});
 	list.forEach(function (v){
 		var eventObject;
-		console.log(v);
+//		console.log(v);
 		if(v.match("\.json$")){
 			eventObject = processJSON(path+"/"+v);
 		} else if (v.match("\.csv$")){
@@ -29,7 +29,7 @@ function getEvents(){
 			eventGroupList = eventGroupList.concat(eventObject.eventGroupList);
 		}
 	});
-	console.dir(events);
+//	console.dir(events);
 	return { events: events, eventGroupList: eventGroupList};
 }
 
@@ -147,6 +147,29 @@ function convertFileToEventObject(path, encoding){
 	return obj;
 }
 
+function writeJsonFile(filePath, contents, encoding){
+//	var contents = fs.readFileSync(filePath, encoding);
+	contents = contents.replace(/\/\*[\s\S]*?\*\//g, '');
+//	fs.writeFile(path + "/testA.json", contents, encoding, function(err) {
+//		console.log("ファイル書き込みしました");
+//		console.log("err" + err);
+//	});
+	var obj = JSON.parse(contents);
+	fs.writeFile(filePath, JSON.stringify(obj, '', '    '), function(err) {
+		console.log("またまたファイル書き込みしました");
+		console.log("err" + err);
+	});
+	try {
+		// 空ファイル作成（すでに存在していたらエラー）
+		fs.writeFileSync(filePath, "", {flag: "wx"});
+	} catch (err) {
+		console.log("ファイル[" + filePath + "]はすでに存在します。");
+		return false;
+	}
+	
+	return obj;
+}
+
 router.get('/', function(req, res) {
   var map = um_utils.getNavbarInfo(req, res);
 
@@ -165,3 +188,60 @@ router.get('/', function(req, res) {
 });
 
 module.exports = router;
+
+//JSONファイル作成処理
+router.post('/addEvent', function(req, res) {
+	// TODO k作成中
+//	var edittingFile = path + "editting.pid";
+//	var editOk = createEmptyFile(edittingFile);
+//	// 誰かがファイル編集中の場合
+//	if (!editOk) {
+//		// TODO イベントを作成できなかったときに画面に表示するメッセージ
+//		res.message("別ユーザがイベント編集中のためイベント[" + req.body.item1 + "]を追加できませんでした。再度操作してください。", "alert-success");
+//	}
+//	// TODO 画面からのリクエストトからファイル名を取得
+//	var targetEventFile = path + req.body.item1;
+//	var contents = fs.readFileSync(path + "/events.json", "UTF-8");
+//	var result = writeJsonFile(path + "/testA.jsona", contents, "UTF-8");
+//	if (result) {
+//		setTimeout(function(){
+//			console.log("イベント " + req.body.item1 + " を作成しました。");
+//			res.message("イベント " + req.body.item1 + " を作成しました。", "alert-success");
+//		}, 5000);
+////		res.redirect('/');
+//	} else {
+//		console.log("イベント " + req.body.item1 + " を作成できませんでした。");
+//		res.message("イベント " + req.body.item1 + " を作成しませんでした。", "alert-success");
+////		res.redirect('/');
+//	}
+	
+	var map = um_utils.getNavbarInfo(req, res);
+	map.title = 'Calendar';
+	var eventObj = getEvents();
+	var evv = JSON.stringify(eventObj.events);
+
+	map.data = evv;
+	map.eventGroupList = eventObj.eventGroupList;
+	return res.render('index', map);
+
+});
+
+/**
+ * 空ファイルを作成する
+ * 
+ * @param filePath ファイルパス
+ * @returns {Boolean} ファイルがすでに存在していたら false<br>
+ *                    ファイルを新規作成したら true
+ */
+function createEmptyFile(filePath){
+	try {
+		// 空ファイル作成（すでに存在していたらエラー）
+		fs.writeFileSync(filePath, "", {flag: "wx"});
+	} catch (err) {
+		console.log("ファイル[" + filePath + "]はすでに存在します。");
+		return false;
+	}
+	console.log("ファイル[" + filePath + "]を作成しました。");
+	return true;
+}
+
