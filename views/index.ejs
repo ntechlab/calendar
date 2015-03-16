@@ -9,6 +9,7 @@
 		<link rel='stylesheet' href='/stylesheets/style.css'/>
 		<script src='/javascripts/lib/moment.min.js'></script>
 		<script src='/javascripts/fullcalendar.js'></script>
+		<script src='/javascripts/jquery-ui.min.js'></script>
 		<script src='/javascripts/ja.js'></script>
 		<script type="text/javascript"><!--
 			var data = <%-data%>;
@@ -31,6 +32,30 @@
 			}
 			
 			$(document).ready(function() {
+				var d = $('#dialog');
+				d.dialog({
+					modal: true,
+					autoOpen: false,
+					width: 500,
+					resizable: false,
+					draggable: false,
+					open: function(){
+						var focusButton = $(".ui-dialog-buttonset>button:nth-child(2)");
+						focusButton.focus();
+					},
+					buttons: {
+						"追加": function() {
+							$(this).dialog("close");
+							//var selectedId = $('#selectedId').val();
+//							submit("/addEvent");
+$('#createEventForm').submit();
+						},
+						"キャンセル": function() {
+							$(this).dialog("close");
+							return false;
+						}
+					}
+				});
 				$('#calendar').fullCalendar({
 					header: {
 							left: 'prev,next today',
@@ -59,17 +84,25 @@
 					//maxTime: '21:00:00',
 					eventLimit: false, // allow "more" link when too many events
 					events: data,
-					// 日付をクリックしたら日カレンダーへ移動する
-					dayClick: function(date, allDay, jsEvent, view) {
-						$('#calendar').fullCalendar('changeView', 'agendaDay');
-						$('#calendar').fullCalendar('gotoDate', date);
-					},
+					// TODO 日付をクリックしたら日カレンダーへ移動する
+//					dayClick: function(date, allDay, jsEvent, view) {
+//						$('#calendar').fullCalendar('changeView', 'agendaDay');
+//						$('#calendar').fullCalendar('gotoDate', date);
+//					},
 					// イベントをクリックしたらポップアップ表示
 					eventClick: function(calEvent, jsEvent, view) {
 						if(calEvent.description!=undefined){
 							alert(calEvent.description);
 						}
 						//$('#calendar').fullCalendar('updateEvent', calEvent);
+					},
+					selectable:true,
+					selectHelper:true,
+					select: function(start, end) {
+						$('#calendar').fullCalendar('unselect');
+						// TODO これはなにか？
+//						var eventData;
+						d.dialog('open');
 					},
 					eventAfterAllRender: customRenderView
 				});
@@ -149,5 +182,22 @@
 	});
 
 --></script>
-
+<div id="dialog" title="イベント登録" style="display:none;">
+	<form action="/addEvent" method="POST" id="createEventForm">
+		<p align="left">
+			<label for="title">タイトル</label><input type="text" size="40" name="title" id="title" class="text ui-widget-content ui-corner-all" />
+		</p>
+		<p align="left">
+			<label for="group">カテゴリー</label>
+			<select name="group">
+				<% for (var i = 0;i < eventGroupList.length;i++){ %>
+					<option value="<%= eventGroupList[i].groupId %>"><%= eventGroupList[i].groupName %></option>
+			  <% } %>
+			</select>
+		</p>
+		<p align="left"><label for="day">日付</label><input type="text" name="day" id="start" class="text ui-widget-content ui-corner-all" /></p>
+		<p align="left"><label for="start">開始時間</label><input type="text" name="start" id="start" class="text ui-widget-content ui-corner-all" /></p>
+		<p align="left"><label for="start">終了時間</label><input type="text" name="end" id="end" class="text ui-widget-content ui-corner-all" /></p>
+	</form>
+</div>
 </html>
