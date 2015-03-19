@@ -182,8 +182,9 @@
 				if(input){
 					ret["date"] = input.substring(0, 10);
 				}
-				if(input && input.length === 19){
-					ret["time"] = input.substring(11);
+				if(input && input.length >= 16){
+					// 表示時に秒とタイムゾーン情報は廃棄する。イベント更新の際にはこれらの情報は削除される。
+					ret["time"] = input.substring(11, 16);
 				}
 				return ret;
 			}
@@ -341,7 +342,7 @@
 							id: calEvent.id,
 							title: calEvent.title,
 							group: calEvent.groupId,
-							description: calEvent.groupId,
+							description: calEvent.description,
 							start_date: start.date,
 							start_time: start.time,
 							end_date: end.date,
