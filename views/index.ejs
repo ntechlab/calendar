@@ -118,10 +118,13 @@
 			// ダイアログ内キーの送信対象項目
 			var dialogKeys = ["id", "title", "group", "description", "start_date", "start_time", "end_date", "end_time"];
 
-			// ダイアログ内の編集可能項目配列
+			// 新規作成時の編集可能項目配列
+			var createEditableKeys = ["title", "group", "description", "start_date", "start_time", "end_date", "end_time"];
+
+			// 更新時の編集可能項目配列
 			var editableKeys = ["title", "description", "start_date", "start_time", "end_date", "end_time"];
 
-			// ダイアログ内の編集可能項目配列
+			// 更新時の読み取り専用項目配列
 			var readonlyKeys = ["title", "description", "group", "start_date", "start_time", "end_date", "end_time"];
 
 			// イベント処理
@@ -194,6 +197,7 @@
 					resizable: true,
 					draggable: false,
 					open: function(){
+						$(".ui-dialog-titlebar-close").hide();
 						$('#cancelAdd').focus();
 					},
 					buttons: [
@@ -227,6 +231,7 @@
 					resizable: true,
 					draggable: true,
 					open: function(){
+						$(".ui-dialog-titlebar-close").hide();
 						$('#update').hide();
 						$('#cancel').focus();
 					},
@@ -352,6 +357,7 @@
 							.addClass('fc-button fc-state-default fc-corner-left fc-corner-right');
 				$button.click(function(){
 					dialogOption.data = null;
+					setEditableStatus(createEditableKeys, true);
 					d.dialog(dialogOption);
 					d.dialog('open');
 				});
