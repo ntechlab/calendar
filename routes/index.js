@@ -195,6 +195,33 @@ router.post('/processEvent', function(req, res) {
 	// JSON編集中ステータスファイル
 	var edittingFile = path + "editting.pid";
 
+	// JSONファイル編集中にする
+	var processOK = createEmptyFile(edittingFile);
+
+	// 誰かがJSONファイル編集中の場合は以降の処理を行わずに終了する
+	if (!processOK) {
+		// JSON編集中ステータスファイルの作成日時を取得
+		var edittingFileDate = getFileCreateTime(edittingFile);
+		var currentDate = new Date();
+		var diffTime = currentDate.getTime() - edittingFileDate.getTime();
+		if (diffTime > 1*60*1000)　{
+			// JSON編集中ステータスファイルが残り続けないよう、作成日時が1分以上前だったら削除して処理を進める
+			processOK = deleteFile(edittingFile);
+			if (processOK) {
+				// 削除成功後にJSON編集中ステータスファイルを再度作成する
+				processOK = createEmptyFile(edittingFile);
+			}
+		}
+		// JSON編集中ステータスファイルの作成、削除、再作成に失敗したら処理を中断する
+		if (!processOK) {
+			errorMessage = "別ユーザがイベント編集中のため処理に失敗しました";
+			logger.error(errorMessage);
+			res.message(errorMessage, "alert-warning");
+			logger.debug("post return");
+			return renderCalendar(req, res);
+		}
+	}
+
 	try {
 		// 画面のリクエストデータから追加するイベント情報を取得
 		var jsonEventData = req.body.data;
@@ -207,17 +234,6 @@ router.post('/processEvent', function(req, res) {
 
 		var addEventName = event.title;
 		var targetEventFile = options.fileName;
-
-		// JSONファイル編集中にする
-		var processOK = createEmptyFile(edittingFile);
-
-		// 誰かがJSONファイル編集中の場合は以降の処理を行わずに終了する
-		if (!processOK) {
-			errorMessage = "別ユーザがイベント編集中のため処理に失敗しました：[" + addEventName + "]";
-			logger.error(errorMessage);
-			res.message(errorMessage, "alert-warning");
-			return renderCalendar(req, res);
-		}
 
 		// 変更するJSONファイルをバックアップする
 		var timestamp = moment().format("YYYYMMDDHHmmssSSS");
@@ -393,5 +409,25 @@ function writeFile(filePath, contents, encoding){
 	}
 	logger.debug("writeFile return: [" + success + "]");
 	return success;
+}
+
+/**
+ * ファイルの作成日時を取得する
+ *
+ * @param filePath ファイルパス
+ * @returns {Date} ファイル作成日時
+ */
+function getFileCreateTime(filePath){
+	logger.debug("getFileCreateTime call: [" + filePath + "]");
+	var ret = null;
+	try {
+		// ファイルステータス取得
+		var stats = fs.statSync(filePath);
+		ret = stats.ctime;
+	} catch (err) {
+		logger.error("ファイル[" + filePath + "]のステータス取得に失敗しました。");
+	}
+	logger.debug("getFileCreateTime return: [" + ret + "]");
+	return ret;
 }
 
