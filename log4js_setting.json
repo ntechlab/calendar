@@ -1,0 +1,13 @@
+{
+    "appenders": [
+		{
+			"type": "datefile",
+			"filename": "logs/app.log",
+			"pattern": "-yyyy-MM-dd"
+		},
+		{
+			"type": "console"
+		}
+    ],
+    "levels": {"app": "INFO"}
+}

@@ -4,6 +4,7 @@ var um_utils = require('../lib/um_utils');
 var mongoose = require('mongoose');
 var db = mongoose.connect('mongodb://localhost/um');
 var Schema = mongoose.Schema;
+var logger = require('../Log.js').getLogger('um_auth');
 
 var Users = new Schema({
    username: {type: String, unique: true},
@@ -18,19 +19,19 @@ mongoose.model('User', Users);
 var User = mongoose.model('User');
 
 process.on('SIGINT', function() {
-	console.log("SIGINTが発生したため、mongooseのコネクションを閉じます。");
+	logger.info("SIGINTが発生したため、mongooseのコネクションを閉じます。");
 	mongoose.disconnect();
 	process.exit(0);
 });
 
 process.on('SIGTERM', function() {
-	console.log("SIGTERMが発生したため、mongooseのコネクションを閉じます。");
+	logger.info("SIGTERMが発生したため、mongooseのコネクションを閉じます。");
 	mongoose.disconnect();
 	process.exit(0);
 });
 
 process.on('uncaughtException', function (err) {
-	console.log("未処理例外が発生しました: " + err);
+	logger.error("未処理例外が発生しました: " + err);
 	mongoose.disconnect();
 	process.exit(0);
 });
@@ -38,7 +39,7 @@ process.on('uncaughtException', function (err) {
 function createDefaultAdminUser() {
 	User.find({}, function(err, users) {
 		if(users.length == 0){
-			console.log("デフォルト管理ユーザーを作成します。");
+			logger.info("デフォルト管理ユーザーを作成します。");
 			var user = new User();
 			user.username = "admin";
 			user.password = um_utils.toHexDigest('nodeapp123');
@@ -47,11 +48,11 @@ function createDefaultAdminUser() {
 			user.roles = [ "admin" ];
 			user.save(function(err){
 				if(err) {
-					console.log("デフォルト管理ユーザーの作成に失敗しました。");
-					console.log(err);
+					logger.error("デフォルト管理ユーザーの作成に失敗しました。");
+					logger.error(err);
 					throw err;
 				}
-				console.log("デフォルト管理ユーザーの作成に成功しました。");
+				logger.info("デフォルト管理ユーザーの作成に成功しました。");
 			});
 		}
 	});
@@ -146,9 +147,10 @@ router.get('/create-user', function(req, res) {
 // ユーザー情報画面表示
 router.get('/user/:username', function(req, res) {
 	var username = req.params.username;
-	console.log("ユーザー情報画面表示[" + username + "]");
+	logger.debug("ユーザー情報画面表示[" + username + "]");
 	if(um_utils.isNotAuthorized(req, "update-user")
 			&& username !== um_utils.getLoginUser(req)){
+		logger.error("ユーザー情報表示の権限がありません。");
 		res.message("ユーザー情報表示の権限がありません。", "alert-danger");
 		return res.redirect('/');
 	}
@@ -156,6 +158,7 @@ router.get('/user/:username', function(req, res) {
 	User.findOne({ username: username }, function(err, user) {
 		if (err) { return done(err); }
 		if (!user) {
+			logger.error("ユーザーが存在しない: [" + username + "]");
 			return done(null, false, { message: 'ユーザーIDが間違っています。' });
 		}
 
@@ -201,30 +204,35 @@ function contains(array, value){
 // ユーザー削除処理
 router.get('/delete/:username', function(req, res) {
 	if(um_utils.isNotAuthorized(req, "delete-user")){
+		logger.error("ユーザー削除の権限がありません。");
 		res.message("ユーザー削除の権限がありません。", "alert-danger");
 		return res.redirect('/');
 	}
 	var username = req.params.username;
 	if(username){
-		console.log("ユーザー削除処理[" + username + "]");
+		logger.debug("ユーザー削除処理[" + username + "]");
 		User.remove({ username: username }, function(err, user) {
 			if (err) { return done(err); }
 			if (!user) {
+				logger.error("ユーザー削除に失敗: [" + username + "]");
 				return done(null, false, { message: '削除に失敗しました。' });
 			} else {
+				logger.info("ユーザー削除に成功: [" + username + "]");
 				res.message("ユーザー " + username + " を削除しました。", "alert-success");
 				res.redirect('/');
 			}
 		});
 	} else {
-		console.log("IDが指定されていないため削除処理を実行しません。[" + username + "]");
+		logger.warn("IDが指定されていないため削除処理を実行しません。[" + username + "]");
 		res.redirect('/');
 	}
 });
 
 // ユーザー一覧画面表示
 router.get('/users', function(req, res) {
+	logger.debug("router.get /users");
 	if(um_utils.isNotAuthorized(req, "list-user")){
+		logger.error("ユーザー一覧表示の権限がありません。");
 		res.message("ユーザー一覧表示の権限がありません。", "alert-danger");
 		return res.redirect('/');
 	}
@@ -248,15 +256,15 @@ router.get('/users', function(req, res) {
 
 // ユーザ登録処理
 router.post('/user', function(req, res) {
-	console.log("ユーザー登録処理");
+	logger.debug("ユーザー登録処理");
 	if(um_utils.isNotAuthorized(req, "create-user")){
+		logger.error("ユーザー登録の権限がありません。");
 		res.message("ユーザー登録の権限がありません。", "alert-danger");
 		return res.redirect('/');
 	}
 
 	// データチェック
 	var errorCheck = dataCheck(req.body);
-
 
 	// 画面再表示用データ作成
 	var map = um_utils.getNavbarInfo(req, res);
@@ -267,7 +275,7 @@ router.post('/user', function(req, res) {
 	map.firstname = req.body.firstname;
 	var definedRoles = um_utils.getDefinedRoleArray(); // 設定可能なロールの配列データを追加。
 	map.roles = getExtendedRoles(req, definedRoles, req.body.roles);
-	
+
 	if(errorCheck["error"]){
 		res.message(errorCheck["message"], "alert-warning");
 		return res.render('um_create_user', map);
@@ -289,11 +297,11 @@ router.post('/user', function(req, res) {
 			if(err.name === 'MongoError' && err.code === 11000){
 				mes = "ユーザーＩＤが重複しています。別なユーザーＩＤを設定してください。";
 			}
-			console.log("mes["+mes+"]");
-			res.message(mes, "alert-danger");			
+			logger.error("mes["+mes+"]");
+			res.message(mes, "alert-danger");
 			return res.render('um_create_user', map);
 		} else {
-			console.log("新規ユーザー"+username+"を登録しました。");
+			logger.info("新規ユーザー"+username+"を登録しました。");
 			res.message("新規ユーザー"+username+"を登録しました。", "alert-success");
 			res.redirect('/');
 		}
@@ -338,7 +346,7 @@ function dataCheckUpdate(obj){
 
 // ユーザ情報更新処理
 router.post('/updateUser', function(req, res) {
-	console.log("ユーザー情報更新処理[" + req.body.username + "]");
+	logger.debug("ユーザー情報更新処理[" + req.body.username + "]");
 	var username = req.body.username;
 	var password = req.body.password;
 	var surname = req.body.surname;
@@ -347,6 +355,7 @@ router.post('/updateUser', function(req, res) {
 	// ユーザー更新権限がなく、かつ、変更対象ユーザーが自分自身でない場合には、エラーとする。
 	if(um_utils.isNotAuthorized(req, "update-user")
 			&& username !== um_utils.getLoginUser(req)){
+		logger.error("ユーザー情報更新の権限がありません。");
 		res.message("ユーザー情報更新の権限がありません。", "alert-danger");
 		return res.redirect('/');
 	}
@@ -369,11 +378,12 @@ router.post('/updateUser', function(req, res) {
 
 	User.findOne({ username: username }, function(err, modified) {
 		if(err){
-			console.dir(err);
+			logger.error("ユーザー情報更新に失敗: ["+ JSON.stringify(err) +"]");
 			res.message("ユーザー情報の更新に失敗しました:" + err, "alert-danger");
 			return res.redirect('/');
 		}
 		if(modified === null){
+			logger.error("ユーザー情報の更新に失敗しました。");
 			res.message("ユーザー情報の更新に失敗しました。", "alert-danger");
 			return res.redirect('/');
 		}
@@ -394,8 +404,9 @@ router.post('/updateUser', function(req, res) {
 
 		modified.save(function(err2){
 			if (err2) {
-				console.log(err2);
+				logger.error(err2);
 			} else {
+				logger.info("ユーザー情報を更新: ["+username+"]");
 				res.message(username + "のユーザー情報を更新しました。", "alert-success");
 				res.redirect('/');
 			}

@@ -1,7 +1,12 @@
 var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
-var logger = require('morgan');
+
+// ロガーとしてmorganではなく、log4jsを利用する。
+//var logger = require('morgan');
+var log4js = require('log4js');
+var logger = require('./Log.js').getLogger('app');
+
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
@@ -23,7 +28,10 @@ app.set('view engine', 'ejs');
 
 // uncomment after placing your favicon in /public
 app.use(favicon(__dirname + '/public/favicon.ico'));
-app.use(logger('dev'));
+//app.use(logger('dev'));
+// Exressのデフォルトログとしてlog4jsを利用。ログレベルはDEBUGとしているが、log4js設定ファイルで、
+// appのログレベルをINFOにしているため、ログは表示されない。必要に応じて適宜変更する。
+app.use(log4js.connectLogger(logger, { level: log4js.levels.DEBUG }));
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());

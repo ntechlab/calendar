@@ -7,13 +7,15 @@
 		<link rel='stylesheet' href='/stylesheets/fullcalendar.css'/>
 		<link rel='stylesheet' href='/stylesheets/fullcalendar.print.css' media='print' />
 		<link rel='stylesheet' href='/stylesheets/style.css'/>
+		<script src='/javascripts/lib/underscore-min.js'></script>
+		<script src='/javascripts/lib/underscore.string.min.js'></script>
 		<script src='/javascripts/lib/moment.min.js'></script>
 		<script src='/javascripts/fullcalendar.js'></script>
 		<script src='/javascripts/jquery-ui.min.js'></script>
 		<script src='/javascripts/ja.js'></script>
 		<script type="text/javascript"><!--
 			var data = <%-data%>;
-			
+
 			// チェックボックスの状態に応じて、対応するイベントグループの表示状態をshow/hiddenで変更する。
 			// この関数を、CalendarのeventAfterAllRenderに設定すると、レンダリングが終わるごとに上記の処理が動く。
 			function customRenderView(){
@@ -22,7 +24,7 @@
 				for(var p = 0; p < len; p++) {
 					var $checkBox = $(checkBoxes[p]);
 					var checked = $checkBox.prop('checked');
-					var groupId = $checkBox.data('classname');
+					var groupId = $checkBox.attr('id');
 					if(checked){
 						$('a.' + groupId).show();
 					} else {
@@ -30,32 +32,253 @@
 					}
 				}
 			}
-			
+
+			function toDateTimeString(date, time){
+				var ret = date;
+				if(time){
+					ret += "T" + time;
+				}
+				return ret;
+			}
+
+			// イベント入力ダイアログ入力データチェック
+			function eventDataCheck(params){
+				console.log("eventDataCheck[" + JSON.stringify(params) + "]");
+				var ret = {valid: true};
+				var message = "";
+
+				var isVacant = function(input){
+					return !input || s.trim(input) === "";
+				}
+				if(isVacant(params.title)){
+					message += "タイトルを入力してください。\n";
+					ret["valid"] = false;
+				}
+				if(isVacant(params.group)){
+					message += "カテゴリーを選択してください。\n";
+					ret["valid"] = false;
+				}
+				if(isVacant(params.fileName)){
+					message += "ファイル名が特定できません。\n";
+					ret["valid"] = false;
+				}
+				if(isVacant(params.start_date)){
+					message += "開始日を入力してください。\n";
+					ret["valid"] = false;
+				}
+				// 終了時刻が入力されている場合には、終了日の入力を必須とする。
+				if(!isVacant(params.end_time) && isVacant(params.end_date)){
+					message += "終了日を入力してください。\n";
+					ret["valid"] = false;
+				}
+				ret["message"] = message;
+				return ret;
+			}
+
+			function clearDialogInput(){
+				var params = {
+					id: "",
+					title: "",
+					group: "",
+					description: "",
+					start_date: "",
+					start_time: "",
+					end_date: "",
+					end_time: ""
+				}
+				setDialogInput(params);
+			}
+
+			function getDialogInput(array){
+				var $form = $('#createEventForm');
+				var ret = {};
+				_.each(array, function(item){
+					ret[item] = $form.find('#'+item).val();
+				});
+				return ret;
+			}
+
+			function setDialogInput(params){
+				var $form = $('#createEventForm');
+				var element;
+				_.each(params, function(value, key){
+					$form.find('#'+key).val(value);
+				});
+			}
+
+			function setEditableStatus(ids, editable){
+				var $form = $('#createEventForm');
+				var element;
+				_.each(ids, function(id){
+					element = $form.find('#'+id);
+					element.prop("disabled", !editable);
+				});
+			}
+
+			// ダイアログ内キーの送信対象項目
+			var dialogKeys = ["id", "title", "group", "description", "start_date", "start_time", "end_date", "end_time"];
+
+			// ダイアログ内の編集可能項目配列
+			var editableKeys = ["title", "description", "start_date", "start_time", "end_date", "end_time"];
+
+			// ダイアログ内の編集可能項目配列
+			var readonlyKeys = ["title", "description", "group", "start_date", "start_time", "end_date", "end_time"];
+
+			// イベント処理
+			function processEvent(action){
+				console.log("processEvent");
+				var $form = $('#createEventForm');
+				var form = $form[0];
+				form.action = "/processEvent";
+				form.method = "POST";
+
+				// ダイアログの入力項目に設定されている値を取得する
+				var params = getDialogInput(dialogKeys);
+				var fileName = $form.find('option[value="'+params["group"]+'"]').data("filename");
+				params["fileName"] = fileName;
+				var status = $('div.fc-button-group button.fc-state-active').text();
+
+				// データチェックを実行する。
+				var checkResult = eventDataCheck(params);
+				if(!checkResult["valid"]){
+					// データチェックメッセージを表示する。
+					alert(checkResult["message"]);
+					// falseを返却した場合には、イベント入力ダイアログを閉じない。
+					return false;
+				}
+
+				// 登録するイベントオブジェクトの作成
+				var event = {
+					title: s.trim(params.title),
+					start: toDateTimeString(params.start_date, params.start_time),
+					end: toDateTimeString(params.end_date, params.end_time)
+				};
+				if(params.description){
+					event.description = params.description;
+				}
+
+				// 送信オブジェクトの作成
+				var data = {
+					event: event,
+					options: {
+						action: action,
+						id: params.id,
+						group: params.group,
+						fileName: params.fileName
+					}
+				};
+				console.dir(data);
+				var output = JSON.stringify(data);
+				console.log("OUTPUT["+output+"]");
+				$form.find('#data').val(output);
+				form.submit();
+			}
+
+			function splitToDateTime(input){
+				var ret = {};
+				if(input){
+					ret["date"] = input.substring(0, 10);
+				}
+				if(input && input.length === 19){
+					ret["time"] = input.substring(11);
+				}
+				return ret;
+			}
 			$(document).ready(function() {
 				var d = $('#dialog');
-				d.dialog({
+				var dialogOption = {
+					title: "イベント追加",
 					modal: true,
 					autoOpen: false,
 					width: 500,
-					resizable: false,
+					resizable: true,
 					draggable: false,
 					open: function(){
-						var focusButton = $(".ui-dialog-buttonset>button:nth-child(2)");
-						focusButton.focus();
+						$('#cancelAdd').focus();
 					},
-					buttons: {
-						"追加": function() {
-							$(this).dialog("close");
-							//var selectedId = $('#selectedId').val();
-//							submit("/addEvent");
-$('#createEventForm').submit();
-						},
-						"キャンセル": function() {
-							$(this).dialog("close");
-							return false;
+					buttons: [
+						{
+							id: "add",
+							text: "追加",
+							click: function() {
+								// 追加するイベント情報をPOSTする。
+								var res = processEvent("add");
+								if(res){
+									$(this).dialog("close");
+								}
+								return false;
+							}
+						}, {
+							id: "cancelAdd",
+							text: "キャンセル",
+							click: function() {
+								$(this).dialog("close");
+								clearDialogInput();
+								return false;
+							}
 						}
-					}
-				});
+					]
+				};
+				var dialogOptionRead = {
+					title: "イベント内容",
+					modal: true,
+					autoOpen: false,
+					width: 500,
+					resizable: true,
+					draggable: true,
+					open: function(){
+						$('#update').hide();
+						$('#cancel').focus();
+					},
+					buttons: [
+						{
+							id: "edit",
+							text: "編集",
+							click: function() {
+								// 編集可能状態に変更する。
+								setEditableStatus(editableKeys, true);
+								$('#edit').hide();
+								$('#update').show();
+								$('#delete').hide();
+								return false;
+							}
+						}, {
+							id: "update",
+							text: "更新",
+							click: function() {
+							var res = processEvent("update");
+							if(res){
+								$(this).dialog("close");
+							}
+							return false;
+							},
+						}, {
+							id: "delete",
+							text: "削除",
+							click: function() {
+								// 追加するイベント情報をPOSTする。
+								var ok = confirm("イベントを削除してよろしいですか？");
+								if(ok){
+									// 削除処理を実行
+									var res = processEvent("delete");
+									if(res){
+										$(this).dialog("close");
+									}
+								}
+								return false;
+							}
+						}, {
+							id: "cancel",
+							text: "キャンセル",
+							click: function() {
+								$(this).dialog("close");
+								clearDialogInput();
+								return false;
+							}
+						}
+					]
+				};
+
 				$('#calendar').fullCalendar({
 					header: {
 							left: 'prev,next today',
@@ -66,8 +289,8 @@ $('#createEventForm').submit();
 					defaultAllDayEventDuration: { days: 0 },
 					timeFormat: "H:mm",
 					//defaultDate: '2014-11-12',
-					defaultView: 'agendaDay', //初めの表示内容を指定
-					editable: true,
+					defaultView: 'month', //初めの表示内容を指定
+					editable: false, //　イベントのドラッグによる移動を禁止
 					// 高さ(px)
 					height: 560,
 					// スロットの時間の書式
@@ -91,21 +314,48 @@ $('#createEventForm').submit();
 //					},
 					// イベントをクリックしたらポップアップ表示
 					eventClick: function(calEvent, jsEvent, view) {
-						if(calEvent.description!=undefined){
-							alert(calEvent.description);
+						var classNameArray = calEvent.className || [];
+						if(!_.contains(classNameArray, "editable")){
+//							console.log("編集不可");
+							return;
 						}
-						//$('#calendar').fullCalendar('updateEvent', calEvent);
-					},
-					selectable:true,
-					selectHelper:true,
-					select: function(start, end) {
-						$('#calendar').fullCalendar('unselect');
-						// TODO これはなにか？
-//						var eventData;
+
+						setEditableStatus(readonlyKeys, false);
+						d.dialog(dialogOptionRead);
+
+						var start = {};
+						if(calEvent.start){
+							start = splitToDateTime(calEvent.start._i);
+						}
+
+						var end = {};
+						if(calEvent.end){
+							end = splitToDateTime(calEvent.end._i);
+						}
+						var params = {
+							id: calEvent.id,
+							title: calEvent.title,
+							group: calEvent.groupId,
+							description: calEvent.groupId,
+							start_date: start.date,
+							start_time: start.time,
+							end_date: end.date,
+							end_time: end.time
+						}
+						setDialogInput(params, false);
 						d.dialog('open');
 					},
 					eventAfterAllRender: customRenderView
 				});
+				var $button = $('<button type="button"></button>')
+							.text("イベント追加")
+							.addClass('fc-button fc-state-default fc-corner-left fc-corner-right');
+				$button.click(function(){
+					dialogOption.data = null;
+					d.dialog(dialogOption);
+					d.dialog('open');
+				});
+				$('.fc-left').append($button);
 			});
 
 		--></script>
@@ -122,6 +372,9 @@ $('#createEventForm').submit();
 				margin: 0 auto;
 			}
 
+			.mycontainer {
+				padding-top: 10px;
+			}
 		</style>
 
 
@@ -129,7 +382,7 @@ $('#createEventForm').submit();
  <body>
     <% include um_navbar %>
     <% include um_messages %>
-    <div class="container" role="main">
+    <div class="mycontainer" role="main">
     <div class="row">
 	    <div class="col-sm-2">
 		    <h3>イベント表示・非表示</h3>
@@ -182,22 +435,52 @@ $('#createEventForm').submit();
 	});
 
 --></script>
-<div id="dialog" title="イベント登録" style="display:none;">
-	<form action="/addEvent" method="POST" id="createEventForm">
-		<p align="left">
-			<label for="title">タイトル</label><input type="text" size="40" name="title" id="title" class="text ui-widget-content ui-corner-all" />
-		</p>
-		<p align="left">
-			<label for="group">カテゴリー</label>
-			<select name="group">
+<div id="dialog" style="display:none;">
+	<form class="form-horizontal" action="/processEvent" method="POST" id="createEventForm">
+		<input type="hidden" name="data" id="data"/>
+		<input type="hidden" name="id" id="id"/>
+		<div class="form-group">
+ 			<label for="title" class="col-xs-3 control-label">タイトル</label>
+  			<div class="col-xs-9">
+  				<input type="text" class="form-control input-sm" size="40" name="title" id="title" class="text ui-widget-content ui-corner-all" />
+  			</div>
+  		</div>
+  		<div class="form-group">
+			<label for="group" class="col-xs-3 control-label">カテゴリー</label>
+  			<div class="col-xs-9">
+  				<select id="group" class="form-control input-sm" name="group">
+  					<option value=""></option>
 				<% for (var i = 0;i < eventGroupList.length;i++){ %>
-					<option value="<%= eventGroupList[i].groupId %>"><%= eventGroupList[i].groupName %></option>
-			  <% } %>
-			</select>
-		</p>
-		<p align="left"><label for="day">日付</label><input type="text" name="day" id="start" class="text ui-widget-content ui-corner-all" /></p>
-		<p align="left"><label for="start">開始時間</label><input type="text" name="start" id="start" class="text ui-widget-content ui-corner-all" /></p>
-		<p align="left"><label for="start">終了時間</label><input type="text" name="end" id="end" class="text ui-widget-content ui-corner-all" /></p>
+					<option data-filename="<%= eventGroupList[i].fileName %>" value="<%= eventGroupList[i].groupId %>"><%= eventGroupList[i].groupName %></option>
+				<% } %>
+				</select>
+  			</div>
+  		</div>
+  		<div class="form-group">
+ 			<label for="description" class="col-xs-3 control-label">説明</label>
+  			<div class="col-xs-9">
+  			<textarea name="description" id="description" class="form-control text ui-widget-content ui-corner-all"></textarea>
+  				<!--<input type="text" class="form-control input-sm" size="40" name="description" id="description" class="text ui-widget-content ui-corner-all" />-->
+  			</div>
+  		</div>
+		<div class="form-group">
+			<label for="start_date" class="col-xs-3 control-label">開始日時</label>
+			<div class="col-xs-5">
+				<input type="date" class="form-control input-sm" name="start_date" id="start_date" class="text ui-widget-content ui-corner-all" />
+			</div>
+			<div class="col-xs-4">
+				<input type="time" class="form-control input-sm" name="start_time" id="start_time" class="text ui-widget-content ui-corner-all" />
+			</div>
+		</div>
+		<div class="form-group">
+			<label for="end_date" class="col-xs-3 control-label">終了日時</label>
+			<div class="col-xs-5">
+				<input type="date" class="form-control input-sm" name="end_date" id="end_date" class="text ui-widget-content ui-corner-all" />
+			</div>
+			<div class="col-xs-4">
+				<input type="time" class="form-control input-sm" name="end_time" id="end_time" class="text ui-widget-content ui-corner-all" />
+			</div>
+		</div>
 	</form>
 </div>
 </html>
