@@ -259,8 +259,8 @@ router.post('/processEvent', function(req, res) {
 			logger.info(message);
 			res.message(message, "alert-success");
 		} else {
-			var errorMessage = "ファイル操作に失敗。イベント[" + addEventName +" ("+id+")]を追加できませんでした。";
-			logger.error(errorMessage + "[writeFile]");
+			var errorMessage = "ファイル操作に失敗。イベント（" + addEventName + "）を追加できませんでした。";
+			logger.error(errorMessage + "[writeFile, " + id + "]");
 			res.message(errorMessage, "alert-danger");
 		}
 	} finally {
@@ -285,17 +285,17 @@ function processEventObject(contents, action, id, event) {
 
 		// イベント情報にeventを追加する
 		contents.event.push(addEventObject);
-		message = "イベント["+event.title+" ("+id+")]を追加しました。";
+		message = "イベント（"+event.title+"）を追加しました。";
 	} else if(action === "update"){
 		var row = u.findWhere(contents.event, {id: id});
 		u.extend(row, event);
-		message = "イベント["+event.title+" ("+id+")]を更新しました。";
+		message = "イベント（"+event.title+"）を更新しました。";
 	} else if(action === "delete"){
 		var list = u.reject(contents.event, function(ev){
 			return ev.id === id;
 		});
 		contents.event = list;
-		message = "イベント["+event.title +" ("+id+")]を削除しました。";
+		message = "イベント（"+event.title+"）を削除しました。";
 	} else {
 		message = "想定外のアクションが指定されました["+action+"]";
 	}

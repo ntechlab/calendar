@@ -58,21 +58,83 @@
 					message += "カテゴリーを選択してください。\n";
 					ret["valid"] = false;
 				}
-				if(isVacant(params.fileName)){
-					message += "ファイル名が特定できません。\n";
+				if(!isVacant(params.group) && isVacant(params.fileName)){
+					message += "カテゴリーが不正です。対応するJSONファイルの名前が特定できません。\n";
 					ret["valid"] = false;
 				}
 				if(isVacant(params.start_date)){
 					message += "開始日を入力してください。\n";
 					ret["valid"] = false;
 				}
+
 				// 終了時刻が入力されている場合には、終了日の入力を必須とする。
 				if(!isVacant(params.end_time) && isVacant(params.end_date)){
 					message += "終了日を入力してください。\n";
 					ret["valid"] = false;
 				}
+
+				if(!isVacant(params.start_date) && !isValidDate(params.start_date)){
+					message += "開始日が不正です（形式：'yyyy-MM-dd'）\n";
+					ret["valid"] = false;
+				}
+
+				if(!isVacant(params.start_time) && !isValidTime(params.start_time)){
+					message += "開始時刻が不正です（形式：'HH:mm'）\n";
+					ret["valid"] = false;
+				}
+
+				if(!isVacant(params.end_date) && !isValidDate(params.end_date)){
+					message += "終了日が不正です（形式：'yyyy-MM-dd'）\n";
+					ret["valid"] = false;
+				}
+
+				if(!isVacant(params.end_time) && !isValidTime(params.end_time)){
+					message += "終了時刻が不正です（形式：'HH:mm'）\n";
+					ret["valid"] = false;
+				}
+
 				ret["message"] = message;
 				return ret;
+			}
+
+			function isValidDate(input){
+				if(/^2\d{3}-\d{2}-\d{2}$/.test(input)){
+					var year = input.substring(0, 4);
+					var month = parseInt(input.substr(5, 2), 10);
+					if(month === 0 || month > 12){
+						return false;
+					}
+					var day = parseInt(input.substr(8, 2), 10);
+					if(day === 0 || day > 31){
+						return false;
+					}
+					var testDate = new Date(year, month - 1, day);
+					if(isNaN(testDate)){
+						return false;
+					}
+					if(testDate.getFullYear() == year && testDate.getMonth() == month - 1 && testDate.getDate() == day){
+						return true;
+					} else {
+						return false;
+					}
+				}
+				return false;
+			}
+
+			function isValidTime(input){
+				if(/^\d{2}:\d{2}$/.test(input)){
+					var HH = parseInt(input.substr(0, 2), 10);
+					var MM = parseInt(input.substr(3, 2), 10);
+					console.log(HH+","+MM);
+					if(HH > 23){
+						return false;
+					}
+					if(MM > 59){
+						return false;
+					}
+					return true;
+				}
+				return false;
 			}
 
 			function clearDialogInput(){
@@ -104,6 +166,17 @@
 				_.each(params, function(value, key){
 					$form.find('#'+key).val(value);
 				});
+			}
+
+			function setDefaultValues(){
+				var $form = $('#createEventForm');
+				var today = new Date();
+				var year = today.getFullYear();
+				var month = s.lpad(today.getMonth() + 1, 2, "0");
+				var day = s.lpad(today.getDate(), 2, "0");
+				var strToday = year + "-" + month + "-" + day;
+				$form.find('#start_date').val(strToday);
+				$form.find('#end_date').val(strToday);
 			}
 
 			function setEditableStatus(ids, editable){
@@ -314,15 +387,14 @@
 					eventLimit: false, // allow "more" link when too many events
 					events: data,
 					// TODO 日付をクリックしたら日カレンダーへ移動する
-//					dayClick: function(date, allDay, jsEvent, view) {
-//						$('#calendar').fullCalendar('changeView', 'agendaDay');
-//						$('#calendar').fullCalendar('gotoDate', date);
-//					},
+					dayClick: function(date, allDay, jsEvent, view) {
+						$('#calendar').fullCalendar('changeView', 'agendaDay');
+						$('#calendar').fullCalendar('gotoDate', date);
+					},
 					// イベントをクリックしたらポップアップ表示
 					eventClick: function(calEvent, jsEvent, view) {
 						var classNameArray = calEvent.className || [];
 						if(!_.contains(classNameArray, "editable")){
-//							console.log("編集不可");
 							return;
 						}
 
@@ -359,6 +431,8 @@
 				$button.click(function(){
 					dialogOption.data = null;
 					setEditableStatus(createEditableKeys, true);
+					// 開始日、終了日のデフォルト値として今日の日付を設定。
+					setDefaultValues();
 					d.dialog(dialogOption);
 					d.dialog('open');
 				});
@@ -473,19 +547,19 @@
 		<div class="form-group">
 			<label for="start_date" class="col-xs-3 control-label">開始日時</label>
 			<div class="col-xs-5">
-				<input type="date" class="form-control input-sm" name="start_date" id="start_date" class="text ui-widget-content ui-corner-all" />
+				<input type="date" placeholder="yyyy/MM/dd" class="form-control input-sm" name="start_date" id="start_date" class="text ui-widget-content ui-corner-all" />
 			</div>
 			<div class="col-xs-4">
-				<input type="time" class="form-control input-sm" name="start_time" id="start_time" class="text ui-widget-content ui-corner-all" />
+				<input type="time" placeholder="HH:mm" class="form-control input-sm" name="start_time" id="start_time" class="text ui-widget-content ui-corner-all" />
 			</div>
 		</div>
 		<div class="form-group">
 			<label for="end_date" class="col-xs-3 control-label">終了日時</label>
 			<div class="col-xs-5">
-				<input type="date" class="form-control input-sm" name="end_date" id="end_date" class="text ui-widget-content ui-corner-all" />
+				<input type="date" placeholder="yyyy/MM/dd" class="form-control input-sm" name="end_date" id="end_date" class="text ui-widget-content ui-corner-all" />
 			</div>
 			<div class="col-xs-4">
-				<input type="time" class="form-control input-sm" name="end_time" id="end_time" class="text ui-widget-content ui-corner-all" />
+				<input type="time" placeholder="HH:mm" class="form-control input-sm" name="end_time" id="end_time" class="text ui-widget-content ui-corner-all" />
 			</div>
 		</div>
 	</form>
